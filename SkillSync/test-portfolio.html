@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Analyzer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #572E54;
+        }
+        button {
+            background: linear-gradient(to right, #8E7692, #572E54);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Portfolio Analyzer Test</h1>
+        <p>This page tests the AI Portfolio Analyzer API directly.</p>
+        
+        <div id="status"></div>
+        
+        <button onclick="testHealth()">1. Test Health Check</button>
+        <button onclick="testAnalysis()">2. Test Portfolio Analysis</button>
+        <button onclick="testSuggestions()">3. Test Project Suggestions</button>
+        <button onclick="testSkills()">4. Test Skill Recommendations</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api/ai';
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status ' + type;
+            statusDiv.textContent = message;
+        }
+        
+        function showResult(data) {
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        async function testHealth() {
+            showStatus('Testing health endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showStatus('✓ Health check passed!', 'success');
+                showResult(data);
+            } catch (error) {
+                showStatus('✗ Health check failed: ' + error.message, 'error');
+                showResult({ error: error.message });
+            }
+        }
+        
+        async function testAnalysis() {
+            showStatus('Testing portfolio analysis...', 'info');
+            
+            const testData = {
+                projects: [
+                    {
+                        name: "E-commerce Website",
+                        description: "Built a full-stack e-commerce platform with React and Node.js",
+                        technologies: ["React", "Node.js", "MongoDB", "Express"],
+                        url: "https://github.com/test/ecommerce",
+                        highlights: ["Payment integration", "User authentication", "Admin dashboard"]
+                    },
+                    {
+                        name: "Weather App",
+                        description: "Mobile weather application with real-time data",
+                        technologies: ["React Native", "API Integration", "Redux"],
+                        url: "",
+                        highlights: ["Real-time weather data", "Location services", "Push notifications"]
+                    }
+                ],
+                skills: ["JavaScript", "React", "Node.js", "MongoDB", "Python", "Git", "Docker"],
+                achievements: "AWS Certified Developer\nPublished 2 npm packages\nWon university hackathon"
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/portfolio/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✓ Analysis completed successfully!', 'success');
+                    showResult(data.analysis);
+                } else {
+                    showStatus('✗ Analysis failed: ' + data.error, 'error');
+                    showResult(data);
+                }
+            } catch (error) {
+                showStatus('✗ Analysis request failed: ' + error.message, 'error');
+                showResult({ error: error.message });
+            }
+        }
+        
+        async function testSuggestions() {
+            showStatus('Testing project suggestions...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/portfolio/suggestions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        currentSkills: ["React", "JavaScript"],
+                        careerGoal: "Full Stack Developer",
+                        experienceLevel: "Intermediate"
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✓ Suggestions retrieved successfully!', 'success');
+                    showResult(data.suggestions);
+                } else {
+                    showStatus('✗ Suggestions failed: ' + data.error, 'error');
+                    showResult(data);
+                }
+            } catch (error) {
+                showStatus('✗ Suggestions request failed: ' + error.message, 'error');
+                showResult({ error: error.message });
+            }
+        }
+        
+        async function testSkills() {
+            showStatus('Testing skill recommendations...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/skills/recommend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        currentSkills: ["React", "JavaScript", "Node.js"],
+                        careerGoal: "Full Stack Developer"
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✓ Skill recommendations retrieved successfully!', 'success');
+                    showResult(data.recommendations);
+                } else {
+                    showStatus('✗ Recommendations failed: ' + data.error, 'error');
+                    showResult(data);
+                }
+            } catch (error) {
+                showStatus('✗ Recommendations request failed: ' + error.message, 'error');
+                showResult({ error: error.message });
+            }
+        }
+        
+        // Auto-run health check on load
+        window.onload = () => {
+            testHealth();
+        };
+    </script>
+</body>
+</html>
+

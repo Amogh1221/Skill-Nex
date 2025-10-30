@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Portfolio Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #572E54; }
+        button {
+            background: linear-gradient(to right, #8E7692, #572E54);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { opacity: 0.9; }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #3B82F6;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-left: 4px solid #8E7692;
+        }
+        .section h3 {
+            color: #572E54;
+            margin-top: 0;
+        }
+        .success { color: #10B981; }
+        .error { color: #EF4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Simple Portfolio Analyzer Test</h1>
+        <p>This page tests the Portfolio Analyzer without React.</p>
+        
+        <button onclick="testAnalysis()">🚀 Analyze Portfolio</button>
+        <button onclick="clearResult()">Clear</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+        }
+
+        async function testAnalysis() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>⏳ Analyzing portfolio...</p>';
+
+            const testData = {
+                projects: [
+                    {
+                        name: "E-commerce Website",
+                        description: "Full-stack e-commerce platform with React and Node.js",
+                        technologies: ["React", "Node.js", "MongoDB", "Express"],
+                        url: "https://github.com/test/ecommerce",
+                        highlights: ["Payment integration", "User authentication"]
+                    },
+                    {
+                        name: "Weather App",
+                        description: "Mobile weather application",
+                        technologies: ["React Native", "Redux"],
+                        url: "",
+                        highlights: ["Real-time data", "Push notifications"]
+                    }
+                ],
+                skills: ["JavaScript", "React", "Node.js", "MongoDB", "Python", "Git", "Docker"],
+                achievements: "AWS Certified Developer\\nPublished 2 npm packages\\nWon university hackathon"
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/ai/portfolio/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.analysis) {
+                    displayAnalysis(data.analysis);
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ Analysis failed: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>
+                    <p>Make sure Python server is running on port 5000:</p>
+                    <pre>cd backend\\npython ai_server.py</pre>`;
+            }
+        }
+
+        function displayAnalysis(analysis) {
+            const resultDiv = document.getElementById('result');
+            
+            let html = '<h2 class="success">✅ Analysis Complete!</h2>';
+            
+            // Portfolio Strength
+            html += `
+                <div class="section">
+                    <h3>Portfolio Strength</h3>
+                    <div class="score">${analysis.portfolioStrength.score}/100</div>
+                    <p style="text-align: center; font-size: 20px; color: ${analysis.portfolioStrength.color}">
+                        ${analysis.portfolioStrength.rating}
+                    </p>
+                    <p><strong>Projects:</strong> ${analysis.portfolioStrength.breakdown.projects}/40</p>
+                    <p><strong>Skills:</strong> ${analysis.portfolioStrength.breakdown.skills}/30</p>
+                    <p><strong>Achievements:</strong> ${analysis.portfolioStrength.breakdown.achievements}/30</p>
+                </div>
+            `;
+
+            // Project Analysis
+            html += `
+                <div class="section">
+                    <h3>Project Analysis</h3>
+                    <p><strong>Total Projects:</strong> ${analysis.projectAnalysis.totalProjects}</p>
+                    <p><strong>Complexity:</strong> ${analysis.projectAnalysis.complexity}</p>
+                    <p><strong>Diversity:</strong> ${analysis.projectAnalysis.diversity}%</p>
+                    <p><strong>Tech Stack:</strong> ${analysis.projectAnalysis.techStack.join(', ')}</p>
+                </div>
+            `;
+
+            // Skill Gaps
+            if (Object.keys(analysis.skillGaps).length > 0) {
+                html += '<div class="section"><h3>Skill Gaps</h3>';
+                for (const [category, skills] of Object.entries(analysis.skillGaps)) {
+                    html += `<p><strong>${category}:</strong> ${skills.join(', ')}</p>`;
+                }
+                html += '</div>';
+            }
+
+            // Career Alignment
+            html += '<div class="section"><h3>Career Alignment</h3>';
+            for (const [career, percentage] of Object.entries(analysis.careerAlignment)) {
+                html += `<p><strong>${career}:</strong> ${percentage}%</p>`;
+            }
+            html += '</div>';
+
+            // Recommendations
+            if (analysis.recommendations && analysis.recommendations.length > 0) {
+                html += '<div class="section"><h3>Recommendations</h3><ul>';
+                analysis.recommendations.forEach(rec => {
+                    html += `<li><strong>[${rec.priority}]</strong> ${rec.category}: ${rec.suggestion}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            // Competitive Analysis
+            html += `
+                <div class="section">
+                    <h3>Competitive Analysis</h3>
+                    <p><strong>Percentile:</strong> ${analysis.competitiveAnalysis.percentile}th</p>
+                    <p><strong>Comparison:</strong> ${analysis.competitiveAnalysis.comparison}</p>
+                </div>
+            `;
+
+            resultDiv.innerHTML = html;
+        }
+
+        // Auto-run on load
+        window.onload = () => {
+            document.getElementById('result').innerHTML = `
+                <p>👋 Click the "Analyze Portfolio" button to test the API.</p>
+                <p>Make sure the Python server is running:</p>
+                <pre>cd backend
+python ai_server.py</pre>
+            `;
+        };
+    </script>
+</body>
+</html>
+
