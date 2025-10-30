@@ -64,17 +64,28 @@ const DashboardPage = () => {
     // Load profile from localStorage
     const savedProfile = localStorage.getItem('studentProfile')
     if (savedProfile) {
-      const parsedProfile = JSON.parse(savedProfile)
-      setProfile(parsedProfile)
+      try {
+        const parsedProfile = JSON.parse(savedProfile)
+        setProfile(parsedProfile)
 
-      // Generate personalized recommendations based on profile
-      generateRecommendations(parsedProfile)
+        // Generate personalized recommendations based on profile
+        const major = parsedProfile.major.toLowerCase()
+        setSkillPathways(generateSkillPathways(major))
+        setCourses(generateCourses(major))
+        setCareers(generateCareers(major))
+      } catch (error) {
+        console.error('Error parsing profile:', error)
+      }
     }
 
     // Load calendar events from localStorage
     const savedEvents = localStorage.getItem('calendarEvents')
     if (savedEvents) {
-      setCalendarEvents(JSON.parse(savedEvents))
+      try {
+        setCalendarEvents(JSON.parse(savedEvents))
+      } catch (error) {
+        console.error('Error parsing events:', error)
+      }
     }
   }, [])
 
@@ -118,22 +129,6 @@ const DashboardPage = () => {
     setCalendarEvents(updatedEvents)
     localStorage.setItem('calendarEvents', JSON.stringify(updatedEvents))
   }, [calendarEvents])
-
-  const generateRecommendations = useCallback((studentProfile: StudentProfile) => {
-    const major = studentProfile.major.toLowerCase()
-
-    // Generate skill pathways based on major
-    const generatedSkills = generateSkillPathways(major)
-    setSkillPathways(generatedSkills)
-
-    // Generate course recommendations based on major
-    const generatedCourses = generateCourses(major)
-    setCourses(generatedCourses)
-
-    // Generate career suggestions based on major
-    const generatedCareers = generateCareers(major)
-    setCareers(generatedCareers)
-  }, [])
 
   const generateSkillPathways = (major: string): SkillPathway[] => {
     // Base soft skills for all majors

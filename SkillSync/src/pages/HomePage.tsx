@@ -87,6 +87,10 @@ const HomePage = () => {
                   loop={true}
                   autoplay={true}
                   style={{ width: '100%', height: 'auto' }}
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice',
+                    progressiveLoad: true
+                  }}
                 />
               </div>
             </motion.div>
@@ -168,6 +172,10 @@ const HomePage = () => {
                   animationData={assessmentAnimation}
                   loop={true}
                   className="w-full h-full"
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice',
+                    progressiveLoad: true
+                  }}
                 />
               </div>
             </motion.div>
@@ -252,6 +260,10 @@ const HomePage = () => {
                   animationData={contactAnimation}
                   loop={true}
                   className="w-full h-full"
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice',
+                    progressiveLoad: true
+                  }}
                 />
               </div>
             </motion.div>
